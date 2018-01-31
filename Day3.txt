@@ -1,0 +1,78 @@
+use HomeWork
+declare @c int=0, @g int=0, @z int
+select @g=min(id) from tmp
+select @c=count(1) from tmp
+while (@g<@c)
+begin
+select @z=id from tmp where id=@g
+if(@z%2=0)
+begin
+DELETE FROM tmp
+where id=@g
+end
+set @g=@g+1
+end
+
+select *from tmp
+
+
+
+////////////////////////////////////////////////////
+while(1=1)
+begin 
+insert into tmp select RAND()*(100-1)+1;
+if(select count(1) from tmp)=1000
+break
+end
+//////////////////////////////////////////////////////
+if not exists (select 1 from sys.tables t
+where t.name='tmp')
+create table tmp(id int)
+else
+print 'таблица уже создана'
+////////////////////////////////////////////////////////
+declare @i int
+set @i=15
+if @i>10
+begin
+print 'i больше 10'
+print 'fiojwiof'
+end
+else
+print 'i меньше или равно 10'
+//////////////////////////////////////////////////////////
+¬ывод количества книг в базе
+declare @cnt int 
+select @cnt= count(1) from books2
+print @cnt
+///////////////////////////////////////////////
+declare @id int, @id2 int=155
+insert into categories
+select 'WIN10'
+set @id=10
+select @id=max(category_id)+1 from categories
+set @id=@@IDENTITY
+insert into books2
+select 123,'–абота с win10',@id
+////////////////////////////////////////////////////////////
+select * from books2 b
+select * from categories c
+select * from themes t
+select * from publishers p
+
+alter view C_BOOKS_NAMES 
+as
+select b.name, c.category_name, t.theme_name, p.publisher_name, b.price
+from books2 b, categories c, themes t, publishers p
+where b.Category_id=c.category_id
+and b.Publisher_id=p.publisher_id
+and b.Theme_id=t.theme_id
+
+use HomeWork
+
+select * from C_BOOKS_NAMES 
+
+select c.Publisher_name, avg(c.Price)
+from C_BOOKS_NAMES c
+group by c.Publisher_name
+////////////////////////////////////////////////////////////////////////////
