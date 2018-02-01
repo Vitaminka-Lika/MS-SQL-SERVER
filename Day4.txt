@@ -1,0 +1,62 @@
+--use master
+--go
+--begin try
+--create database test
+--end try
+--begin catch
+--	--waitfor delay '0:0:15'
+--	waitfor time '19:34:50'
+--	select getdate()
+--print 'БД test уже существует'
+--	SELECT
+--	 ERROR_MESSAGE() AS ErrorMessage
+--end catch
+--go 
+--use test
+--begin try
+--create table tst(id int)
+--end try
+--begin catch
+--print 'БД test уже существует'
+--end catch
+--insert into tst select 1
+
+--select * from tst
+
+--if not exists
+--(select sys.tables.name from sys.tables where name='tst')
+--create table tst(id int)
+--insert into tst select 1
+
+--begin try
+--end try
+--begin catch
+--end catch
+
+use HomeWork
+Alter procedure GET_BOOKS
+--with encryption
+as
+select * from books2
+
+execute GET_BOOKS
+
+--create proc name @param1 type, @param2 type = default value
+
+alter proc add_price @prc int
+as
+update books2 set price=price + price*@prc/100
+print 'цена книг повышена на'+ convert(varchar(10), @prc)+ ' процентов!'
+
+select * from books2
+exec add_price 10 
+
+create proc get_sum(@a int, @b int, @c int output)
+as
+begin
+set @c=@a+@b
+end
+
+declare @result int
+exec get_sum 5,10,@result output
+print @result
