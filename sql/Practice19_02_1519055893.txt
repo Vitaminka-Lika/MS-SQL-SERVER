@@ -1,0 +1,190 @@
+
+use Library
+go
+
+create table Students
+(
+stu_id int not null identity primary key,
+stu_fio nvarchar(100) not null,
+stu_email nvarchar(100),
+stu_phone nvarchar(20)
+)
+
+create table Librarians
+(
+lib_id int not null identity primary key,
+lib_fio nvarchar(100) not null,
+lib_email nvarchar(100),
+lib_phone nvarchar(20)
+)
+
+create table Themes
+(
+theme_id int not null identity primary key,
+theme_name nvarchar(100) not null,
+)
+
+create table Journal
+(
+rec_id int not null identity primary key,
+stu_id int not null,
+lib_id int not null,
+book_id int not null,
+st_date datetime not null,
+end_date datetime null,
+check(st_date<getdate())
+)
+
+create table Books
+(
+book_id int not null identity primary key,
+book_name nvarchar(100) not null,
+book_author nvarchar(100) not null,
+book_theme int not null,
+book_date datetime not null,
+book_available bit,
+check(book_date<getdate())
+)
+
+go
+
+alter table Books
+add constraint FK_THEME foreign key(book_theme)
+references Themes(theme_id)
+
+
+alter table Journal
+add constraint FK_STUDENT foreign key(stu_id)
+references Students(stu_id)
+
+alter table Journal
+add constraint FK_LIBRARIAN foreign key(lib_id)
+references Librarians(lib_id)
+
+alter table Journal
+add constraint FK_BOOK foreign key(book_id)
+references Books(book_id)
+
+go
+
+use Library
+create nonclustered index FK_THEME on dbo.Books(book_theme)
+
+create nonclustered index FK_STUDENT on dbo.Students(stu_id)
+
+create nonclustered index FK_LIBRARIAN on dbo.Librarians(lib_id)
+
+create nonclustered index FK_BOOK on dbo.Books(book_id)
+
+go
+
+create trigger Valid_Dates
+on Journal
+for insert
+as
+begin
+declare @res int;
+select  @res= sum(case when i.st_date<i.end_date then 1 else 0 end) from inserted i
+if @res>0
+print 'ќшибка верности данных'
+rollback transaction
+end;
+
+go 
+
+CREATE LOGIN LibraryAdmin   
+    WITH PASSWORD = 'admin';  
+Go
+CREATE LOGIN LibraryStudent   
+    WITH PASSWORD = 'student';  
+Go
+CREATE LOGIN LibraryTeacher   
+    WITH PASSWORD = 'teacher';  
+CREATE LOGIN LibraryLibrarian  
+    WITH PASSWORD = 'librarian';  
+Go
+
+USE Library
+GO
+CREATE USER LibraryAdmin FOR LOGIN LibraryAdmin WITH DEFAULT_SCHEMA=[dbo]
+GO
+go
+CREATE USER LibraryStudent FOR LOGIN LibraryStudent WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER LibraryTeacher FOR LOGIN LibraryTeacher WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER LibraryLibrarian FOR LOGIN LibraryLibrarian WITH DEFAULT_SCHEMA=[dbo]
+GO
+
+CREATE VIEW ShowStudentsInJournal
+          AS SELECT Books.book_name, Students.stu_fio 
+          FROM Books,Students, Journal
+          WHERE Books.book_id=Journal.book_id and Students.stu_id=Journal.stu_id; 
+
+--fffffff
+create role SysAdmin
+grant select,update,delete,insert on Books to SysAdmin
+grant select,update,delete,insert on Journal to SysAdmin
+grant select,update,delete,insert on Librarian to SysAdmin
+grant select,update,delete,insert on Students to SysAdmin
+grant select,update,delete,insert on Themes to SysAdmin
+GRANT SELECT ON ShowStudentsInJournal TO SysAdmin
+alter role SysAdmin add member LibraryAdmin
+
+create role Librarian
+grant select,update,delete,insert on Books to Librarian
+grant select,update,delete,insert on Journal to Librarian
+grant select,update,delete,insert on Themes to Librarian
+alter role Librarian add member LibraryLibrarian
+
+create role Teacher
+grant select,update,delete,insert on Books to Teacher
+grant select,update,delete,insert on Journal to Teacher
+grant select,update,delete,insert on Themes to Teacher
+GRANT SELECT ON ShowStudentsInJournal TO Teacher
+alter role Teacher add member LibraryTeacher
+
+
+--ffffff
+
+
+create table Journal_arch(
+arch_id int not null,
+arch_stu_id int not null,
+arch_lib_id int not null,
+arch_book_id int not null,
+arch_st_date datetime not null,
+arch_end_date datetime null,
+arch_user nvarchar(100) not null,
+arch_date datetime not null,
+)
+
+
+create trigger DeleteRecInJournal
+on Journal
+instead of delete
+as 
+begin 
+insert into Journal_arch
+select d.*,getdate(),system_user
+from deleted d
+end
+
+
+create trigger InserteRecInJournal
+on Journal
+for update
+as 
+begin 
+declare @mes nvarchar(100)
+select case 
+	when i.stu_id!=j.stu_id then CONCAT(@mes,' stu_id было изменено,')
+	when i.lib_id!=j.lib_id then CONCAT(@mes,' lib_id было изменено,')
+	when i.book_id!=j.book_id then CONCAT(@mes,' book_id было изменено,')
+	when i.st_date!=j.st_date then CONCAT(@mes,' st_date было изменено,')
+	when i.end_date!=j.end_date then CONCAT(@mes,' end_date было изменено,')
+end from inserted i,Journal j
+where j.rec_id = i.rec_id
+select getdate(),system_user,@mes
+end
+

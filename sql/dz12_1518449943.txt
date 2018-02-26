@@ -1,0 +1,94 @@
+﻿1.добавить необходимые роли в базу данных больничных листов
+2.добавить минимум три пользователя
+3.База данных students - 3 роли и 5 пользователей добавить
+
+CREATE LOGIN forHomeWork   
+    WITH PASSWORD = 'homework';  
+Go
+CREATE LOGIN forHomeWork2   
+    WITH PASSWORD = 'homework';  
+Go
+CREATE LOGIN forHomeWork3   
+    WITH PASSWORD = 'homework';  
+CREATE LOGIN forHomeWork4   
+    WITH PASSWORD = 'homework';
+CREATE LOGIN forHomeWork5   
+    WITH PASSWORD = 'homework';    
+Go
+USE [PracticeWork]
+GO
+CREATE USER HM1 FOR LOGIN [forHomeWork] WITH DEFAULT_SCHEMA=[dbo]
+GO
+go
+CREATE USER HM2 FOR LOGIN [forHomeWork2] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER HM3 FOR LOGIN [forHomeWork3] WITH DEFAULT_SCHEMA=[dbo]
+GO
+use PracticeWork
+go 
+create role Boss
+grant select on Case_Histories to Boss
+grant select on D_Educations to Boss
+grant select on Departments to Boss
+grant select on Employees to Boss
+grant select on Posts to Boss
+alter role Boss add member HM1
+
+
+create role SysAdmin
+grant select,update,delete,insert on Case_Histories to SysAdmin
+grant select,update,delete,insert on D_Educations to SysAdmin
+grant select,update,delete,insert on Departments to SysAdmin
+grant select,update,delete,insert on Employees to SysAdmin
+grant select,update,delete,insert on Posts to SysAdmin
+alter role SysAdmin add member HM2
+
+create role MedicalWorker
+grant select,update,delete,insert on Case_Histories to MedicalWorker
+grant select on Employees to MedicalWorker
+alter role MedicalWorker add member HM3
+
+
+
+use itstep 
+CREATE USER User1 FOR LOGIN [forHomeWork] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER User2 FOR LOGIN [forHomeWork2] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER User3 FOR LOGIN [forHomeWork3] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER User4 FOR LOGIN [forHomeWork4] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER User5 FOR LOGIN [forHomeWork5] WITH DEFAULT_SCHEMA=[dbo]
+
+create role SysAdmin
+grant select,update,delete,insert on courses to SysAdmin
+grant select,update,delete,insert on groups to SysAdmin
+grant select,update,delete,insert on marks to SysAdmin
+grant select,update,delete,insert on students to SysAdmin
+grant select,update,delete,insert on subjects to SysAdmin
+grant select,update,delete,insert on teachers to SysAdmin
+alter role SysAdmin add member User1
+
+create role Boss
+grant select on courses to Boss
+grant select on groups to Boss
+grant select on marks to Boss
+grant select on students to Boss
+grant select on subjects to Boss
+grant select on teachers to Boss
+alter role Boss add member User2
+
+create role Teacher
+grant select on courses to Teacher
+grant select on groups to Teacher
+grant select,update,delete,insert on marks to Teacher
+grant select on students to Teacher
+alter role Teacher add member User3
+
+create role Student
+grant select on courses to Student
+grant select on groups to Student
+grant select on marks to Student
+grant select on students to Student
+grant select on subjects to Student
+alter role Student add member User4
+alter role Student add member User5
+
+

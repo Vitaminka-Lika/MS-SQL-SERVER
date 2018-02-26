@@ -1,0 +1,214 @@
+create table Sellers
+(
+seller_id int not null identity,
+name nvarchar(100) not null,
+)
+
+create table Sellings
+(
+selling_id int not null identity,
+seller_id int not null,
+cd_id int not null
+)
+
+create table CDs
+(
+cd_id int not null identity,
+cd_name nvarchar(100) not null,
+cd_date datetime not null,
+band_id int not null,
+format_id int not null
+)
+
+create table Bands
+(
+band_id int not null identity,
+band_name nvarchar(100) not null,
+band_year date
+)
+
+create table Formats
+(
+format_id int not null identity,
+format_name nvarchar(100) not null,
+)
+
+use HomeWork2
+
+alter table Sellers
+ADD CONSTRAINT PK_SELLERS PRIMARY KEY CLUSTERED (seller_id);
+
+alter table Sellings
+ADD CONSTRAINT PK_SELLINGS PRIMARY KEY CLUSTERED (selling_id);  
+
+alter table CDs
+ADD CONSTRAINT PK_CDS PRIMARY KEY CLUSTERED (cd_id);  
+
+alter table Bands
+ADD CONSTRAINT PK_BANDS PRIMARY KEY CLUSTERED (band_id);  
+
+alter table Formats
+ADD CONSTRAINT PK_FORMATS PRIMARY KEY CLUSTERED (format_id);    
+
+
+alter table Sellings
+add constraint FK_SELLINGS_SELLERS foreign key(seller_id)
+references Sellers(seller_id)
+
+alter table Sellings
+add constraint FK_SELLINGS_CDS foreign key(cd_id)
+references CDs(cd_id)
+
+alter table CDs
+add constraint FK_CDS_FORMATS foreign key(format_id)
+references Formats(format_id)
+
+alter table CDs
+add constraint FK_CDS_BANDS foreign key(band_id)
+references Bands(band_id)
+
+
+insert into Formats([format_name])
+values ('audio')
+
+insert into Formats([format_name])
+values ('mp3')
+
+insert into Bands([band_name],[band_year])
+values ('Сборники',null)
+
+insert into Bands([band_name],[band_year])
+values ('виа Гра','2002')
+
+insert into Bands([band_name],[band_year])
+values ('Ария','1984')
+
+insert into Bands([band_name],[band_year])
+values ('Меладзе','1995')
+
+insert into Bands([band_name],[band_year])
+values ('Тальков','1984')
+
+insert into Bands([band_name],[band_year])
+values ('Наутилус','1983')
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Союз28','2004',1,1)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Стоп Снято','2002',2,1)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Крещенье Огнем','2003',3,1)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Все альбомы','2005',4,2)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Все альбомы','2005',5,2)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Лучшие песни','2005',3,2)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Атлантида','1997',6,2)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Атлантида','2007',6,1)
+
+insert into CDs([cd_name],[cd_date],[band_id],[format_id])
+values ('Крылья','1997',6,1)
+
+
+insert into Sellers([name])
+values ('Федоров Максим')
+
+insert into Sellers([name])
+values ('Оров Александр')
+
+
+insert into Sellings([seller_id],[cd_id])
+values (1,1)
+
+insert into Sellings([seller_id],[cd_id])
+values (1,2)
+
+insert into Sellings([seller_id],[cd_id])
+values (1,3)
+
+insert into Sellings([seller_id],[cd_id])
+values (1,4)
+
+insert into Sellings([seller_id],[cd_id])
+values (1,5)
+
+insert into Sellings([seller_id],[cd_id])
+values (2,6)
+
+insert into Sellings([seller_id],[cd_id])
+values (2,1)
+
+insert into Sellings([seller_id],[cd_id])
+values (2,8)
+
+insert into Sellings([seller_id],[cd_id])
+values (1,9)
+
+insert into Sellings([seller_id],[cd_id])
+values (2,10)
+
+use HomeWork2
+
+create view Show_all_sellings as
+select Sellers.name[Продавец], CDs.cd_name[Название],YEAR(CDs.cd_date)[Год выпуска],Bands.band_name[Группа],YEAR(Bands.band_year)[Год группы], Formats.format_name[Формат]
+from Sellings, Sellers, CDs, Bands, Formats
+where Sellings.seller_id=Sellers.seller_id AND
+		Sellings.cd_id=CDs.cd_id AND
+		CDs.band_id=Bands.band_id AND
+		CDs.format_id=Formats.format_id;
+
+create view Show_all_sold_bands_cds as
+SELECT Bands.band_name as bands, Count(Sellings.cd_id) as amount
+FROM
+ Sellings
+  LEFT JOIN CDs  ON CDs.cd_id= Sellings.cd_id
+  LEFT JOIN Bands  ON Bands.band_id= CDs.band_id
+GROUP BY Bands.band_name
+
+create view Most_popular_group as 
+select top 1 Bands.band_name as top_one
+from Sellings
+LEFT JOIN CDs on Sellings.cd_id=CDs.cd_id
+LEFT JOIN Bands on CDs.band_id=Bands.band_id
+group by Bands.band_name
+order by COUNT(Bands.band_name) desc
+
+use HomeWork
+go
+
+create view Show_Most_Publisher
+as
+select top 1 p.publisher_name, count(b.Publisher_id) as num
+from books2 b, publishers p where b.Theme_id=(select theme_id from themes where themes.theme_name='Программирование')
+group by p.publisher_name
+order by count(b.Publisher_id) desc
+
+
+create view Show_Unpopular_Theme
+as
+select top 100 t.theme_name, sum(b.Pages) as total
+from themes t, books2 b where b.Theme_id=(select theme_id from themes where themes.theme_id=b.Theme_id)
+group by t.theme_name
+order by sum(b.Pages) 
+
+create view Show_Most_Expensive_Book_BHV
+as
+select top 1 b.Name, b.Price
+from books2 b where b.Publisher_id=(Select publishers.publisher_id from publishers where publishers.publisher_name='BHV')
+order by b.Price desc
+
+create view Show_Books_With_More_Pages
+as
+select top 10000 b.Name, b.Pages
+from books2 b where b.Pages > (select AVG(b.Pages) from books2 b)
+order by b.Pages 

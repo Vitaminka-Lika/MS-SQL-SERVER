@@ -1,0 +1,11 @@
+use PracticeWork
+
+create nonclustered index[FK_Emp] on dbo.Case_Histories(case_emp)
+
+create nonclustered index[FK_Emp_Dep] on dbo.Departments(dep_id)
+
+create nonclustered index[FK_Emp_Edu] on dbo.D_Educations(edu_id)
+
+create nonclustered index[FK_Emp_Post] on dbo.Posts(post_id)
+
+

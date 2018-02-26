@@ -1,0 +1,12 @@
+use Library
+go
+
+create nonclustered index[I_theme] on dbo.Books(book_theme)
+
+create nonclustered index[I_book] on dbo.Journal(book_id)
+
+create nonclustered index[I_librarian] on dbo.Journal(lib_id)
+
+create nonclustered index[I_student] on dbo.Journal(stu_id)
+
+

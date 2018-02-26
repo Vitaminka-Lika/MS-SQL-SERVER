@@ -1,0 +1,36 @@
+﻿
+посмотреть транзакции ms sql https://www.youtube.com/watch?v=E5K6fAIcqRM
+
+Посмотрела.
+
+2. 
+create table tmp(id int not null identity,value int)
+
+while (1=1)
+begin
+insert into tmp select RAND()*(100-1)+1;
+if (select count(1) from tmp)=1000 
+break
+end
+
+проходитесь в цикце по всем записям и проверяете value на четность
+если четно - удалить запись
+
+
+use HomeWork
+declare @c int=0, @g int=0, @z int
+select @g=min(id) from tmp
+select @c=count(1) from tmp
+while (@g<@c)
+begin
+select @z=id from tmp where id=@g
+if(@z%2=0)
+begin
+DELETE FROM tmp
+where id=@g
+end
+set @g=@g+1
+end
+
+select *from tmp
+

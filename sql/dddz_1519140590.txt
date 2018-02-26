@@ -1,0 +1,63 @@
+use employee
+go
+
+create trigger Valid_Delete
+on emps
+for delete
+as
+begin
+declare @res int;
+select  @res= sum(case when d.salary>10000 then 1 else 0 end) from deleted d
+if @res>0
+print 'Ошибка доступа к удалению'
+end;
+
+go
+use CarRent
+go
+
+create function Get_Profit(@start datetime, @end datetime)
+returns money
+begin
+declare @total money
+select @total=sum(d.total_price) from Deals d where d.rent_start_date<=@start and d.rent_stop_date>=@end
+return @total
+end
+
+go
+create function Get_Info(@id int)
+returns nvarchar(225)
+begin
+declare @info nvarchar(225), @string nvarchar(225), 
+@car_id int,@mark nvarchar(50),@model nvarchar(100),
+@color nvarchar(50),@car_y datetime,
+@car_price money,@car_state bit
+set @car_id=@id
+select @mark=c.mark from Cars c where c.car_id=@id
+select @model=c.model from Cars c where c.car_id=@id
+select @color=c.color from Cars c where c.car_id=@id
+select @car_y=c.car_year from Cars c where c.car_id=@id
+select @car_price=c.car_price from Cars c where c.car_id=@id
+select @car_state=c.car_state from Cars c where c.car_id=@id
+set @string=Concat(@car_id,' ',@mark,' ',@model,' ',@color,' ',@car_y,' ',@car_price,' ',@car_state)
+select @info=CONVERT(nvarchar(225),@string)
+return @info
+end
+
+go
+create trigger Change
+on Deals
+for update
+as
+begin
+begin try
+declare @res money;
+select  @res=d.total_price+0.1*DATEDIFF(day ,d.rent_stop_date,i.rent_stop_date )from inserted i, Deals d where d.deal_id=i.deal_id
+print @res
+end try
+begin catch	
+print 'Ошибка'
+	SELECT
+	 ERROR_MESSAGE() AS ErrorMessage
+end catch
+end
